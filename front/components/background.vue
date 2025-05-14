@@ -1,11 +1,11 @@
 <template>
-    <div>
-      <NuxtParticles
-        id="tsparticles"
-        :options="options"
-      ></NuxtParticles>
-    </div>
-  </template>
+  <div style="position: absolute; top: -20px; left: -300px;">
+    <NuxtParticles
+      id="tsparticles"
+      :options="options"
+    ></NuxtParticles>
+  </div>
+</template>
   
   <script setup lang="ts">
   import { ref } from 'vue'
@@ -49,11 +49,7 @@
         enable: true,
       },
       links: {
-        color: "#b2ffa8",
-        enable: true,
-        distance: 350,
-        opacity: 0.3,
-        warp: true
+        enable: false,
       },
       move: {
         enable: true,
@@ -64,10 +60,11 @@
         type: "circle",
       },
       size: {
-        value: 3,
+        value: { min: 1, max: 5 },
+        random: true,
       },
       number: {
-        value: 100
+        value: 150
       }
     },
     interactivity: {
