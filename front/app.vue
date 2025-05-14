@@ -1,4 +1,6 @@
 <template>
-  <NuxtPage/>
-  <Background/>
+  <UApp>
+    <NuxtPage />
+    <Background/>
+  </UApp>
 </template>
