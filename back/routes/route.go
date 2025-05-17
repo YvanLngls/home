@@ -13,6 +13,7 @@ func SetupRoutes() *mux.Router {
 	r.HandleFunc("/register", handlers.RegisterHandler).Methods("POST")
 	r.HandleFunc("/login", handlers.LoginHandler).Methods("POST")
 	r.HandleFunc("/protected", middleware.AuthMiddleware(handlers.ProtectedHandler)).Methods("GET")
+	r.HandleFunc("/ws", handlers.WebSocketHandler)
 
 	return r
 }

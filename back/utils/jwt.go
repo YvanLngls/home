@@ -21,3 +21,17 @@ func GenerateJWT(username string) (string, time.Time, error) {
 	tokenString, err := token.SignedString(JwtKey)
 	return tokenString, expirationTime, err
 }
+
+func ValidateJWT(tokenString string) (*models.Claims, error) {
+	claims := &models.Claims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return JwtKey, nil
+	})
+
+	if err != nil || !token.Valid {
+		return nil, err
+	}
+
+	return claims, nil
+}

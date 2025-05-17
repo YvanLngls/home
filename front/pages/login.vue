@@ -37,16 +37,40 @@
     </div>
   </template>
   
-  <script setup>
+  <script setup lang="ts">
   import { ref } from 'vue';
   
   const username = ref('');
   const password = ref('');
-  
-  const handleSubmit = () => {
-    // Logique de connexion ici
-    console.log('Se connecter avec:', username.value, password.value);
-  };
+    
+  const handleSubmit = async () => {
+  try {
+    const res = await fetch('http://localhost:8080/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: username.value,
+        password: password.value
+      }),
+      credentials: 'include' // important: allows cookies
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(errText);
+    }
+
+    const data = await res.json();
+    console.log('Logged in:', data);
+
+    // Optional: redirect or show success
+  } catch (err) {
+    console.error('Login error:', err);
+  }
+};
+
   </script>
   
   <style scoped>
