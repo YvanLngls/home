@@ -1,58 +1,55 @@
 <template>
-    <div class="min-h-screen flex items-center justify-center">
-      <div class="bg-white p-8 rounded-lg shadow-md w-80">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Login</h2>
-  
-        <form @submit.prevent="handleSubmit">
-          <div class="mb-4">
-            <label for="username" class="block text-sm font-medium text-gray-600">Username</label>
-            <input 
-              type="text" 
-              id="username" 
-              v-model="username" 
-              class="w-full p-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              required 
-            />
-          </div>
-  
-          <div class="mb-6">
-            <label for="password" class="block text-sm font-medium text-gray-600">Password</label>
-            <input 
-              type="password" 
-              id="password" 
-              v-model="password" 
-              class="w-full p-2 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" 
-              required 
-            />
-          </div>
-  
-          <button 
-            type="submit" 
-            class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            Login
-          </button>
-        </form>
+  <div class="min-h-screen flex flex-col items-center justify-center">
+    <div class="p-8 rounded-lg backdrop-filter backdrop-blur-xs bg-white/10 shadow-lg">
+    <UForm :state="state" :validate="validate" @submit="onSubmit"
+    class="space-y-4 opacity-100">
+    <h1 class="text-2xl font-bold mb-4">Login</h1>
+      <UFormField label="Username">
+        <UInput v-model="state.username"/>
+      </UFormField>
+
+      <UFormField label="Password">
+        <UInput v-model="state.password" type="password"/>
+      </UFormField>
+      
+      <div class="flex justify-center mt-8">
+        <UButton type="submit">
+          Submit
+        </UButton>
       </div>
-    </div>
-  </template>
+    </UForm>
+  </div>
+  </div>
+</template>
   
   <script setup lang="ts">
-  import { ref } from 'vue';
+  import { useRoute } from 'vue-router';
   
-  const username = ref('');
-  const password = ref('');
-    
-  const handleSubmit = async () => {
-  try {
-    const res = await fetch('http://localhost:8080/login', {
+  const state = reactive({
+    username: undefined,
+    password: undefined
+  })
+  
+  const validate = (state: any): FormsError[] => {
+    const errors = []
+    if (!state.username) errors.push({ name: 'username', message: 'Required' })
+    if (!state.password) errors.push({ name: 'password', message: 'Required' })
+    return errors
+  }
+  
+  const toast = useToast()
+  const router = useRouter();
+  
+  async function onSubmit(event: FormSubmitEvent<typeof state>) {
+    try {
+      const res = await fetch('http://localhost:8080/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        username: username.value,
-        password: password.value
+        username: state.username,
+        password: state.password
       }),
       credentials: 'include' // important: allows cookies
     });
@@ -64,16 +61,15 @@
 
     const data = await res.json();
     console.log('Logged in:', data);
+    toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'primary' })
+
+    router.push("/dashboard")
 
     // Optional: redirect or show success
-  } catch (err) {
-    console.error('Login error:', err);
+    } catch (err) {
+      toast.add({ title: 'Error', description: 'Could not login : '+err+'.', color: 'error' })
+      console.error('Could not login:', err);
+    }
   }
-};
-
-  </script>
   
-  <style scoped>
-  /* Aucun fond gris ajouté */
-  </style>
-  
+</script>
