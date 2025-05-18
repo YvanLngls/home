@@ -1,6 +1,8 @@
 <template>
   <UApp>
-    <NuxtPage />
-    <Background/>
+    <div class="flex flex-col sm:flex-row">
+      <NuxtPage />
+      <Background/>
+    </div>
   </UApp>
 </template>

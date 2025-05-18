@@ -23,7 +23,7 @@
 </template>
   
   <script setup lang="ts">
-  import { useRoute } from 'vue-router';
+  import { useRouter } from 'vue-router';
   
   const state = reactive({
     username: undefined,
