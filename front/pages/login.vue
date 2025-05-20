@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center">
+  <div class="min-h-screen w-full flex flex-col items-center justify-center">
     <div class="p-8 rounded-lg backdrop-filter backdrop-blur-xs bg-white/10 shadow-lg">
     <UForm :state="state" :validate="validate" @submit="onSubmit"
     class="space-y-4 opacity-100">

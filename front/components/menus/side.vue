@@ -1,5 +1,5 @@
 <template>
-  <div class="p-4 rounded-lg backdrop-filter backdrop-blur-xs bg-black/30 shadow-lg drop-shadow-xl">
+  <div class="p-4 m-4 rounded-lg backdrop-filter backdrop-blur-xs bg-black/30 shadow-lg drop-shadow-xl">
     <UNavigationMenu orientation="vertical" :items="items" class="data-[orientation=vertical]:w-48" />
   </div>
 </template>

@@ -69,6 +69,9 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Name:    "token",
 		Value:   tokenString,
 		Expires: expirationTime,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
 	})
 
 	json.NewEncoder(w).Encode(map[string]string{"message": "Logged in successfully", "token": tokenString})
