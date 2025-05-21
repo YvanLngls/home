@@ -5,12 +5,17 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
 
     if (!token) return navigateTo('/login');
 
-    const { data, error } = await $fetch('http://localhost:8080/verify-token', {
-      method: 'POST',
-      headers: { cookie: cookieHeader },
-      credentials: 'include',
-    });
-
-    if (error || !data?.valid) return navigateTo('/login');
+    try {
+      const raw = await $fetch<{ valid: boolean }>('http://localhost:8080/verify-token', {
+        method: 'POST',
+        headers: { cookie: cookieHeader },
+        credentials: 'include',
+      });
+      const res = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!res.valid) return navigateTo('/login');
+    } catch (err) {
+      console.log(err)
+      return navigateTo('/login');
+    }
   }
 });
