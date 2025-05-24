@@ -19,7 +19,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := config.RedisClient.Get(context.Background(), user.Username).Result()
+	_, err := config.RedisUserDb.Get(context.Background(), user.Username).Result()
 	if err == nil {
 		http.Error(w, "User already exists", http.StatusBadRequest)
 		return
@@ -31,7 +31,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = config.RedisClient.Set(context.Background(), user.Username, hashedPassword, 0).Err()
+	err = config.RedisUserDb.Set(context.Background(), user.Username, hashedPassword, 0).Err()
 	if err != nil {
 		http.Error(w, "Failed to store user", http.StatusInternalServerError)
 		return
@@ -48,7 +48,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	storedPassword, err := config.RedisClient.Get(context.Background(), user.Username).Result()
+	storedPassword, err := config.RedisUserDb.Get(context.Background(), user.Username).Result()
 	if err != nil {
 		http.Error(w, "User not found", http.StatusNotFound)
 		return

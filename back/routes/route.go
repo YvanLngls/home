@@ -15,6 +15,7 @@ func SetupRoutes() *mux.Router {
 	r.HandleFunc("/protected", middleware.AuthMiddleware(handlers.ProtectedHandler)).Methods("GET")
 	r.HandleFunc("/ws", handlers.WebSocketHandler)
 	r.HandleFunc("/verify-token", middleware.AuthMiddleware(handlers.VerifyTokenHandler)).Methods("POST")
+	r.HandleFunc("/car/add", handlers.AddCarHandler).Methods("POST")
 
 	return r
 }
