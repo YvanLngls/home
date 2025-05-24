@@ -31,3 +31,19 @@ func AddCarHandler(w http.ResponseWriter, r *http.Request){
 	w.WriteHeader(http.StatusCreated)
 }
 
+func DeleteCarHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "Missing id", http.StatusBadRequest)
+		return
+	}
+
+	key := "car:" + id
+	err := config.RedisDataDb.Del(r.Context(), key).Err()
+	if err != nil {
+		http.Error(w, "Failed to delete car", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
