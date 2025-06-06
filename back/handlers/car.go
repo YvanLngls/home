@@ -76,5 +76,45 @@ func DeleteCarHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, "Car deleted successfully")
+	fmt.Println("Car deleted successfully")
+}
 
+func GetCarHandler(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "Missing id", http.StatusBadRequest)
+		return
+	}
+
+	key := "car:" + id
+
+	// Get the car data from Redis
+	carJSON, err := config.RedisDataDb.Get(context.Background(), key).Result()
+	if err != nil {
+		if err == nil {
+			http.Error(w, "Car not found", http.StatusNotFound)
+		} else {
+			http.Error(w, "Failed to get car", http.StatusInternalServerError)
+		}
+		return
+	}
+
+	// Unmarshal the JSON data into a Car object
+	var car models.Car
+	err = json.Unmarshal([]byte(carJSON), &car)
+	if err != nil {
+		http.Error(w, "Failed to unmarshal car data", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the content type to JSON
+	w.Header().Set("Content-Type", "application/json")
+
+	// Encode the car object to JSON and write it to the response
+	err = json.NewEncoder(w).Encode(car)
+	if err != nil {
+		http.Error(w, "Failed to encode car data", http.StatusInternalServerError)
+		return
+	}
+	fmt.Println("Get information on car ",id)
 }

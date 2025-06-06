@@ -50,9 +50,7 @@
                 const errText = await res.text();
                 throw new Error(errText);
             }
-            // console.log("response : ",res)
-            // const data = await res.json();
-            // console.log('Created:', data);
+            console.log("Created : ",res)
             toast.add({ title: 'Success', description: 'The car has been created.', color: 'primary' })
         } catch (err) {
         toast.add({ title: 'Error', description: 'Could not create the car : '+err+'.', color: 'error' })
