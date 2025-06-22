@@ -15,10 +15,13 @@ func SetupRoutes() *mux.Router {
 	r.HandleFunc("/protected", middleware.AuthMiddleware(handlers.ProtectedHandler)).Methods("GET")
 	r.HandleFunc("/ws", handlers.WebSocketHandler)
 	r.HandleFunc("/verify-token", middleware.AuthMiddleware(handlers.VerifyTokenHandler)).Methods("POST")
+	r.HandleFunc("/getUserInfos", middleware.AuthMiddleware(handlers.GetUserInfos)).Methods("GET")
+
 	r.HandleFunc("/car/add", middleware.AuthMiddleware(handlers.AddCarHandler)).Methods("POST")
 	r.HandleFunc("/car/delete", middleware.AuthMiddleware(handlers.DeleteCarHandler)).Methods("DELETE")
 	r.HandleFunc("/car/get", middleware.AuthMiddleware(handlers.GetCarHandler)).Methods("GET")
-	r.HandleFunc("/getUserInfos", middleware.AuthMiddleware(handlers.GetUserInfos)).Methods("GET")
+
+	r.HandleFunc("/music/play", middleware.AuthMiddleware(handlers.PlayMusicHandler)).Methods("POST")
 
 	return r
 }
