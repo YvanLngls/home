@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -19,27 +20,61 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := config.RedisUserDb.Get(context.Background(), user.Username).Result()
+	ctx := context.Background()
+
+	// Vérifie si username existe déjà
+	_, err := config.RedisUserDb.Get(ctx, "username:"+user.Username).Result()
 	if err == nil {
 		http.Error(w, "User already exists", http.StatusBadRequest)
 		return
 	}
 
+	// Génère un ID unique
+	id, err := config.RedisUserDb.Incr(ctx, "user:next_id").Result()
+	if err != nil {
+		http.Error(w, "Failed to generate user ID", http.StatusInternalServerError)
+		return
+	}
+	userId := fmt.Sprintf("%d", id)
+
+	// Hash le mot de passe
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
 		return
 	}
 
-	err = config.RedisUserDb.Set(context.Background(), user.Username, hashedPassword, 0).Err()
+	// Stocke l'utilisateur dans un hash
+	userKey := "user:" + userId
+	err = config.RedisUserDb.Set(ctx, userKey, string(hashedPassword), 0).Err()
 	if err != nil {
 		http.Error(w, "Failed to store user", http.StatusInternalServerError)
+		return
+	}
+
+	// Stocke l'utilisateur
+	err = config.RedisDataDb.HSet(ctx, userKey, map[string]interface{}{
+		"username":   user.Username,
+		"creation": time.Now().Format(time.RFC3339),
+		"lastConnection": time.Now().Format(time.RFC3339),
+		"joinedSimulations": "[]",
+	}).Err()
+	if err != nil {
+		http.Error(w, "Failed to store user", http.StatusInternalServerError)
+		return
+	}
+
+	// Crée l’index username → userId
+	err = config.RedisUserDb.Set(ctx, "username:"+user.Username, userId, 0).Err()
+	if err != nil {
+		http.Error(w, "Failed to index username", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprint(w, "User registered successfully")
 }
+
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var user models.User
@@ -48,9 +83,20 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	storedPassword, err := config.RedisUserDb.Get(context.Background(), user.Username).Result()
+	ctx := context.Background()
+
+	// Trouve l’ID via le username
+	userId, err := config.RedisUserDb.Get(ctx, "username:"+user.Username).Result()
 	if err != nil {
 		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	// Récupère les données utilisateur
+	userKey := "user:" + userId
+	storedPassword, err := config.RedisUserDb.Get(ctx, userKey).Result()
+	if err != nil {
+		http.Error(w, "Failed to retrieve user", http.StatusInternalServerError)
 		return
 	}
 
@@ -65,14 +111,80 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = config.RedisDataDb.HSet(ctx, userKey, map[string]interface{}{
+		"lastConnection": time.Now().Format(time.RFC3339),
+	}).Err()
+	if err != nil {
+		http.Error(w, "Failed to store last connection date", http.StatusInternalServerError)
+		return
+	}
+
 	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Value:   tokenString,
-		Expires: expirationTime,
+		Name:     "token",
+		Value:    tokenString,
+		Expires:  expirationTime,
 		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "username",
+		Value:    user.Username,
+		Expires:  expirationTime,
+		HttpOnly: false,
 		Secure:   false,
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	json.NewEncoder(w).Encode(map[string]string{"message": "Logged in successfully", "token": tokenString})
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Logged in successfully",
+		"token":   tokenString,
+	})
+}
+
+
+func GetUserInfos(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	claims, err := utils.ValidateJWT(cookie.Value)
+	if err != nil {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+	user := claims.Username
+	ctx := context.Background()
+	
+	// Récupère l’ID via username
+	userId, err := config.RedisUserDb.Get(ctx, "username:"+user).Result()
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	// Récupère la date de création
+	createdAt, err := config.RedisDataDb.HGet(ctx, "user:"+userId, "creation").Result()
+	if err != nil {
+  	http.Error(w, "Failed to get creation date", http.StatusInternalServerError)
+		return
+	}
+
+	// Récupère la date de dernière connection
+	lastConnection, err := config.RedisDataDb.HGet(ctx, "user:"+userId, "lastConnection").Result()
+	if err != nil {
+  	http.Error(w, "Failed to get last connexion date", http.StatusInternalServerError)
+		return
+	}
+
+	// w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+	// json.NewEncoder(w).Encode(map[string]string{
+		"username":    user,
+		"createdAt":  createdAt,
+		"lastConnection":  lastConnection,
+	})
 }
