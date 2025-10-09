@@ -35,6 +35,11 @@ const items = ref<NavigationMenuItem[][]>([
       label: 'Voiture',
       icon: 'hugeicons:car-03',
       to: '/car',
+    },
+    {
+      label: 'Voyages',
+      icon: 'hugeicons:airplane-02',
+      to: '/travel',
     }
   ]
 ])
