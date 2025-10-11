@@ -13,7 +13,8 @@
   
   const token = useCookie<string>('token')?.value;
   const isAuthenticated = !!token;
-  let color = "#8806ce"
+  let color = "#66023C"
+  // let color = "#8806ce"
   if(isAuthenticated){color = "#00003d"}
 
   const options = ref({
@@ -23,7 +24,8 @@
     },
     background: {
       color: { value: "transparent" },
-      image: "radial-gradient(circle at top left, #010b13, "+color+")",
+      image: "radial-gradient(circle at top left, "+color+", #010b13)",
+      // image: "radial-gradient(circle at top left, #010b13, "+color+")",
       position: "center",
       repeat: "no-repeat",
       size: "cover"
