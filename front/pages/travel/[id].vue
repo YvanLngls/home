@@ -6,8 +6,24 @@ const routeId = route.params.id;
 const travelName = "Impressionisme"
 const travelCountry = "France"
 const travelStartDate = "10/10/2025"
+const travelEndDate = "17/10/2025"
+const travelNumberDays = "7"
 const travelBudget = 2000
 
+const dayOneActivities = [
+  { time: '09:00', description: 'Visite du Colisée', location: 'Rome, Italie', link: 'https://google.fr' },
+]
+
+const dayList = [
+  {day: "1", date: "10/10/2025", activities: dayOneActivities},
+  {day: "2", date: "11/10/2025", activities: [
+    {time: '10:00', description: 'Petit déjeuné', location: 'Café', link: 'link'}
+  ]},
+  {day: "3", date: "12/10/2025", activities: [
+    {time: '20:00', description: 'Spectacle', location: 'Cabaret', link: 'link'}
+  ]},
+]
+const travelPreparationCompletion = ref(Math.floor(dayList.length*100/travelNumberDays))
 
 </script>
 
@@ -16,7 +32,7 @@ const travelBudget = 2000
   <MenusSide/>
   <div class="m-8 p-6 w-full h-full min-h-screen rounded-xl bg-black/20 backdrop-blur-sm">
     <div class="mb-4 flex flex-col">
-      <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-200 mb-2 border-b-2 border-secondary pb-2">Détails du voyage : {{ travelName }}, {{travelCountry}} ({{travelStartDate}})</h1>
+      <h1 class="text-3xl font-bold mb-2 border-b-2 border-secondary pb-2">Détails du voyage : {{ travelName }}, {{travelCountry}} ({{travelStartDate}})</h1>
       <div class="flex">
         <NuxtLink to="/travel" class="text-primary hover:underline hover:text-secondary">
           &larr; Retour à la liste des voyages
@@ -64,11 +80,50 @@ const travelBudget = 2000
       </TresCanvas>
     </div>
     
-    <p class="text-lg mb-4">
-      Budget : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelBudget }} €</span>
-    </p>
+    <div>
+      <p class="my-2">
+        Budget : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelBudget }} €</span>
+      </p>
+      <p class=my-2>
+        Date de départ : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelStartDate }}</span>
+      </p>
+      <p class=my-2>
+        Date de retour : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelEndDate }}</span>
+      </p>
+      <p class=my-2>
+        Nombre de jours : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelNumberDays }}</span>
+      </p>
+      <p class=my-2>
+        Personnes présentent : <span class="font-mono bg-gray-800 p-1 rounded">{{  }} </span>
+      </p>
+    </div>
+
+    <UCard class="my-16">
+      <template #header>
+        <h2 class="text-2xl font-bold">Programme</h2>
+      </template>
+      
+        <TravelDay 
+          v-for="dayItem in dayList" 
+          :key="dayItem.day" 
+          :day="Number(dayItem.day)" 
+          :date="dayItem.date" 
+          :activities="dayItem.activities" 
+        />
+        
+        <p v-if="dayList.length === 0" class="text-center text-gray-500 mt-10">
+          Aucun jour de voyage planifié pour le moment...
+        </p>
+
+        <template #footer>
+          <div>
+            <h3 class="my-2">Préparation : <span class="text-gray-400 text-sm">{{travelPreparationCompletion}} %</span></h3>
+            <UProgress v-model="travelPreparationCompletion" size="lg"/>
+          </div>
+        </template>
+      
+    </UCard>
     
-    <UCard>
     
       <div>
         <p class="text-lg mb-4">
@@ -81,10 +136,6 @@ const travelBudget = 2000
           depuis ton API ou ton store (titre, dates, photos, journal de bord, etc.).
         </p>
       </div>
-
-      <template #footer>
-      </template>
-    </UCard>
 
   </div>
 </template>
