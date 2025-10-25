@@ -14,32 +14,43 @@
         :data="activities" 
         :columns="columns"
       >
-        
+      </UTable>
 
-      </UTable>      
-      <!-- <div 
-        v-for="(activity, index) in activities" 
-        :key="index" 
-        class="flex items-start mb-3"
-      >
-        <div class="font-bold w-16">{{ activity.time }}</div>
-        <div class="">
-          <p>{{ activity.description }}</p>
-        </div>
-        <div class="mx-4">
-          <a :href="activity.link" target="_blank" class="text-primary hover:text-secondary font-medium transition duration-150 ease-in-out">{{activity.location}}</a>
-        </div>
-      </div> -->
+      
     </div>
     
     <p v-else class="text-center py-3">
-      Rien de prévu pour le moment. 🌴
+      ❓ Informations non renseignées
     </p>
+    <div class="w-full py-8 px-16" v-if="nuggetList.length>0">
+      <UCarousel
+        v-slot="{ item }"
+        :items="nuggetList"
+        :ui="{ item: 'basis-1/2' }"
+        arrows
+        :prev-icon="'heroicons:chevron-left-16-solid'"
+        :next-icon="'heroicons:chevron-right-16-solid'"
+        :autoplay="{ delay: 5000 }"
+        loop
+        dots
+        class="w-full"
+      >
+        <div class="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800 h-full">
+          <h3 class="text-lg font-semibold mb-2">{{ item.name }}</h3>
+          <p class="text-gray-700 dark:text-gray-300">{{ item.description }}</p>
+        </div>
+      </UCarousel>
+    </div>
 
   </div>
 </template>
 
 <script setup lang="ts">
+
+interface Nugget {
+  name: string;
+  description: string;
+}
 
 interface Activity {
   time: string;
@@ -52,6 +63,7 @@ interface DayProps {
   day: number;
   date?: string; // Optionnel
   activities: Activity[];
+  nuggetList: Nugget[];
 }
 
 // 2. Utilisation de defineProps avec l'interface
@@ -60,6 +72,7 @@ const props = withDefaults(
   {
     // Définition des valeurs par défaut
     activities: () => [],
+    nuggetList: () => [],
     date: ''
   }
 );
@@ -87,5 +100,5 @@ const columns: TableColumn<Activity>[] = [
   },
 ];
 // 3. Destructuration pour un accès plus propre dans le template (optionnel mais courant)
-const { day, date, activities } = props;
+const { day, date, activities, nuggetList} = props;
 </script>

@@ -51,7 +51,7 @@ const travelSections = ref([
     ]
   },
   {
-    title: "Voyages Passés",
+    title: "Carnets de voyage",
     color: "bg-primary",
     trips: [
       {

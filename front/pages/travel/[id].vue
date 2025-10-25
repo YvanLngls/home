@@ -13,15 +13,24 @@ const travelBudget = 2000
 const dayOneActivities = [
   { time: '09:00', description: 'Visite du Colisée', location: 'Rome, Italie', link: 'https://google.fr' },
 ]
+const mockNuggetList = [
+  { name: "Arrivée", description: "Arrivée à destination, installation à l'hôtel et exploration du quartier historique." },
+  { name: "Musée de ville", description: "Visite du musée principal de la ville et déjeuner dans un restaurant local typique." },
+  { name: "Ballade à la fraîche", description: "Excursion d'une journée vers un site naturel ou une ville voisine. Nous nous sommes levé assez tôt pour accomplir cette ballade mais ce fut un super moment de découvrir les falaises voisines dans le calme, sans personne pour nous dérranger." },
+  // { name: "Temps libre", description: "Journée libre ou activités de loisir (shopping, plage, détente)." },
+  // ... autres jours
+];
 
 const dayList = [
-  {day: "1", date: "10/10/2025", activities: dayOneActivities},
+  {day: "1", date: "10/10/2025", activities: dayOneActivities, nuggetList: mockNuggetList},
   {day: "2", date: "11/10/2025", activities: [
-    {time: '10:00', description: 'Petit déjeuné', location: 'Café', link: 'link'}
+    {time: '10:00', description: 'Petit déjeuné', location: 'Café', link: 'link'},
+    {time: '11:00', description: 'Visite d\'un parc', location: 'Parc', link: '/'}
   ]},
   {day: "3", date: "12/10/2025", activities: [
     {time: '20:00', description: 'Spectacle', location: 'Cabaret', link: 'link'}
   ]},
+  {day: "4"}
 ]
 const travelPreparationCompletion = ref(Math.floor(dayList.length*100/travelNumberDays))
 
@@ -80,20 +89,22 @@ const travelPreparationCompletion = ref(Math.floor(dayList.length*100/travelNumb
       </TresCanvas>
     </div>
     
-    <div>
-      <p class="my-2">
+    <div class="flex justify-around">
+      <p class="mx-2">
         Budget : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelBudget }} €</span>
       </p>
-      <p class=my-2>
-        Date de départ : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelStartDate }}</span>
-      </p>
-      <p class=my-2>
-        Date de retour : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelEndDate }}</span>
-      </p>
-      <p class=my-2>
-        Nombre de jours : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelNumberDays }}</span>
-      </p>
-      <p class=my-2>
+      <div class="flex">
+        <p class="mx-2">
+          Date de départ : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelStartDate }}</span>
+        </p>
+        <p class="mx-2">
+          Date de retour : <span class="font-mono bg-gray-800 p-1 rounded">{{ travelEndDate }}</span>
+        </p>
+        <p class="mx-2 italic">
+          ({{ travelNumberDays }} jours)
+        </p>
+      </div>
+      <p class="mx-2">
         Personnes présentent : <span class="font-mono bg-gray-800 p-1 rounded">{{  }} </span>
       </p>
     </div>
@@ -109,6 +120,7 @@ const travelPreparationCompletion = ref(Math.floor(dayList.length*100/travelNumb
           :day="Number(dayItem.day)" 
           :date="dayItem.date" 
           :activities="dayItem.activities" 
+          :nuggetList="dayItem.nuggetList"
         />
         
         <p v-if="dayList.length === 0" class="text-center text-gray-500 mt-10">
